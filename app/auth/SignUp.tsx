@@ -1,0 +1,61 @@
+import React, { useState } from "react";
+import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import { supabase } from "../../util/supabase";
+import { signUp } from "../../util/auth";
+
+const SignUp = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const router = useRouter();
+
+  const handleSignUp = async () => {
+    const { data, error } = await signUp(email, password);
+
+    if (error) {
+      Alert.alert("Sign up failed", error.message);
+      return;
+    }
+
+    const uuid = data.user?.id;
+
+    if (uuid) {
+      const { error: insertError } = await supabase.from("user_details").insert([
+        {
+          uuid,
+          email,
+          first_name: firstName,
+          last_name: lastName,
+        },
+      ]);
+
+      if (insertError) {
+        Alert.alert("Failed to save user details", insertError.message);
+      } else {
+        Alert.alert("Success", "Account created! Please sign in.");
+        router.replace("/auth/SignIn");
+      }
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Create Account</Text>
+      <TextInput style={styles.input} placeholder="First Name" value={firstName} onChangeText={setFirstName} />
+      <TextInput style={styles.input} placeholder="Last Name" value={lastName} onChangeText={setLastName} />
+      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" />
+      <TextInput style={styles.input} placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
+      <Button title="Sign Up" onPress={handleSignUp} />
+    </View>
+  );
+};
+
+export default SignUp;
+
+const styles = StyleSheet.create({
+  container: { flex: 1, justifyContent: "center", padding: 20 },
+  title: { fontSize: 28, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
+  input: { borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 10 },
+});
