@@ -5,29 +5,29 @@ import { supabase } from "../../util/supabase";
 import { signUp } from "../../util/auth";
 
 const SignUp = () => {
-  const [email, setEmail] = useState("");
+  const [Email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const router = useRouter();
 
   const handleSignUp = async () => {
-    const { data, error } = await signUp(email, password);
+    const { data, error } = await signUp(Email, password);
 
     if (error) {
       Alert.alert("Sign up failed", error.message);
       return;
     }
 
-    const uuid = data.user?.id;
+    const UUID = data.user?.id;
 
-    if (uuid) {
+    if (UUID) {
       const { error: insertError } = await supabase.from("user_details").insert([
         {
-          uuid,
-          email,
-          first_name: firstName,
-          last_name: lastName,
+          UUID,
+          Email,
+          FirstName: firstName,
+          LastName: lastName,
         },
       ]);
 
@@ -45,7 +45,7 @@ const SignUp = () => {
       <Text style={styles.title}>Create Account</Text>
       <TextInput style={styles.input} placeholder="First Name" value={firstName} onChangeText={setFirstName} />
       <TextInput style={styles.input} placeholder="Last Name" value={lastName} onChangeText={setLastName} />
-      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" />
+      <TextInput style={styles.input} placeholder="Email" value={Email} onChangeText={setEmail} autoCapitalize="none" />
       <TextInput style={styles.input} placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
       <Button title="Sign Up" onPress={handleSignUp} />
     </View>
