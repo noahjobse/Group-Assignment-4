@@ -25,32 +25,20 @@ const SignUp = () => {
 
   const handleSignUp = async () => {
     const { data, error } = await signUp(Email, password);
-
+  
     if (error) {
       Alert.alert("Sign up failed", error.message);
       return;
     }
-
-    const UUID = data.user?.id;
-
-    if (UUID) {
-      const { error: insertError } = await supabase.from("user_details").insert([
-        {
-          UUID,
-          Email,
-          FirstName: firstName,
-          LastName: lastName,
-        },
-      ]);
-
-      if (insertError) {
-        console.warn("Insert to user_details failed:", insertError.message);
-      }
-
-      Alert.alert("Success", "Account created! Please sign in.");
-      router.replace("/auth/SignIn");
-    }
+  
+    Alert.alert(
+      "Verify your email",
+      "A confirmation link has been sent to your email. Please verify before signing in."
+    );
+  
+    router.replace("/auth/SignIn");
   };
+  
 
   return (
     <KeyboardAvoidingView

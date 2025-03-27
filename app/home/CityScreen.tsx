@@ -24,6 +24,10 @@ const cityData = {
 };
 
 export default function CityScreen({ city, link }: CityScreenProps) {
+  console.log("City:", city);
+  console.log("City Data:", cityData[city as keyof typeof cityData]);
+  console.log("Image Path:", cityData[city as keyof typeof cityData]?.image);
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>

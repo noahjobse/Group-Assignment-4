@@ -15,21 +15,64 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { signIn } from "../../util/auth";
+import { supabase } from "../../util/supabase";
+
 
 const SignIn = () => {
   const [Email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  const handleSignIn = async () => {
-    const { error } = await signIn(Email, password);
+const handleSignIn = async () => {
+  const { data: signInData, error } = await signIn(Email, password);
 
-    if (error) {
-      Alert.alert("Login failed", error.message);
-    } else {
-      router.push("/home");
+  if (error) {
+    Alert.alert("Login failed", error.message);
+    return;
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    Alert.alert("Login failed", "Unable to retrieve user information.");
+    return;
+  }
+
+  if (!user.email_confirmed_at) {
+    Alert.alert("Email not verified", "Please verify your email before signing in.");
+    return;
+  }
+
+  // Check if user profile exists in user_details
+  const { data: existingProfile, error: profileError } = await supabase
+    .from("user_details")
+    .select("*")
+    .eq("UUID", user.id)
+    .single();
+
+  if (!existingProfile && !profileError) {
+    // If no profile exists, insert a placeholder (optional: prompt later for full profile)
+    const { error: insertError } = await supabase.from("user_details").insert([
+      {
+        UUID: user.id,
+        Email: user.email,
+        FirstName: "Unknown",
+        LastName: "User",
+      },
+    ]);
+
+    if (insertError) {
+      console.warn("Profile insert failed:", insertError.message);
     }
-  };
+  }
+
+  // Success
+  router.push("/landing-page/landingPage");
+};
+
 
   return (
     <KeyboardAvoidingView
